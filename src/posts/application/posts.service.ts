@@ -3,7 +3,7 @@ import { PostRepository } from '../domain/post.repository';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { UpdatePostDto } from '../dto/update-post.dto';
 import { Post } from '../domain/post.entity';
-import { User } from '../../users/entities/users.entity';
+import { User } from '../../users/entity/users.entity';
 
 @Injectable()
 export class PostsService {

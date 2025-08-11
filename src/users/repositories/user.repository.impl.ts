@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../entities/users.entity';
+import { User } from '../entity/users.entity';
 import { IUserRepository } from './interfaces/users.repository';
 
 @Injectable()
@@ -18,6 +18,14 @@ export class UserRepositoryImpl implements IUserRepository {
   async findOne(id: number): Promise<User | null> {
     const user = await this.repo.findOneBy({ id });
     console.log(user)
+    if (!user) {
+        throw new Error('User not found');
+    }
+    return user;
+  }
+
+  async findOneByEmail(email: string): Promise<User | null> {
+    const user = await this.repo.findOneBy({ email });
     if (!user) {
         throw new Error('User not found');
     }

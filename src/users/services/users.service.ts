@@ -1,11 +1,12 @@
-import { Injectable, NotFoundException,Inject } from '@nestjs/common';
-import { User } from '../entities/users.entity';
+import { Injectable, Inject, Get, UseGuards } from '@nestjs/common';
+import { User } from '../entity/users.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { IUserRepository } from '../repositories/interfaces/users.repository';
 import { USER_REPOSITORY } from '../constants/user-repository.token';
-import { UserDefaultDto } from '../dto/user-default.dto';
+import { UserDefaultDto } from '../transformer/user-default.dto';
 import { plainToInstance } from 'class-transformer';
+import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +27,11 @@ export class UsersService {
         return this.userRepository.findOne(id)
     }
 
+    findOneByEmail(email: string)
+    {
+        return this.userRepository.findOneByEmail(email)
+    }
+
     create(createUserDto : CreateUserDto)
     {
         const user = new User()
@@ -41,5 +47,11 @@ export class UsersService {
 
     async delete(id: number) {
         await this.userRepository.delete(id)
+    }
+
+    @Get()
+    @UseGuards(AuthGuard('jwt'))
+    getProfile() {
+        return { message: 'Profile info' };
     }
 }

@@ -1,0 +1,17 @@
+{
+  "auth": {
+    "invalid_credentials": "Invalid email or password",
+    "unauthorized": "Unauthorized access",
+    "token_expired": "Your session has expired. Please login again."
+  },
+  "user": {
+    "not_found": "User not found",
+    "created_successfully": "User created successfully",
+    "email_taken": "This email is already in use"
+  },
+  "validation": {
+    "required": "{{field}} is required",
+    "email": "Invalid email address",
+    "min_length": "{{field}} must be at least {{min}} characters"
+  }
+}

@@ -1,0 +1,76 @@
+image: node:20
+
+definitions:
+  steps:
+    - step: &build-test
+        name: 🧪 Build & Test NestJS App
+        caches:
+          - node
+        script:
+          - npm install --force
+          - npm run build
+          - npm run test:cov  
+
+    - step: &scan-sonarQube
+        name: 🔍 Scan with SonarQube
+        caches:
+          - node
+        script:
+          - npm install --force
+          - pipe: sonarsource/sonarqube-scan:2.0.1
+            variables:
+              SONAR_HOST_URL: ${SONAR_HOST_URL}
+              SONAR_TOKEN: ${SONAR_TOKEN}
+              EXTRA_ARGS: >
+                -Dsonar.projectKey=${SONAR_PROJECT_KEY}
+                -Dsonar.sources=src
+                -Dsonar.tests=src
+                -Dsonar.test.inclusions=**/*.spec.ts
+                -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
+
+    - step: &check-quality-gate
+        name: ✅ Check SonarQube Quality Gate
+        script:
+          - pipe: sonarsource/sonarqube-quality-gate:1.0.0
+            variables:
+              SONAR_TOKEN: ${SONAR_TOKEN}
+
+pipelines:
+  custom:
+    build:
+      - step: *build-test
+
+    sonar:
+      - step: *scan-sonarQube
+      - step: *check-quality-gate
+
+  branches:
+    dev:
+      - step:
+          name: "🚀 Deploy to Dev Server"
+          deployment: dev
+          runs-on:
+            - self.hosted
+            - linux
+          script:
+            - echo "Deploying to ${BITBUCKET_BRANCH} environment"
+            - pipe: atlassian/ssh-run:0.2.2
+              variables:
+                SSH_USER: "${server_username}"
+                SERVER: "${server_ip}"
+                COMMAND: "sudo /home/${server_username}/deploy-nest-backend.sh ${BITBUCKET_BRANCH}"
+
+    qa:
+      - step:
+          name: "🚀 Deploy to QA Server"
+          deployment: qa
+          runs-on:
+            - self.hosted
+            - linux
+          script:
+            - echo "Deploying to ${BITBUCKET_BRANCH} environment"
+            - pipe: atlassian/ssh-run:0.2.2
+              variables:
+                SSH_USER: "${server_username}"
+                SERVER: "${server_ip}"
+                COMMAND: "sudo /home/${server_username}/deploy-nest-backend.sh ${BITBUCKET_BRANCH}"
